@@ -1,0 +1,184 @@
+From a138a0bd17262ef5eec1f692af71b83c0203cc3d Mon Sep 17 00:00:00 2001
+From: zhouyy <redshift1991@outlook.com>
+Date: Wed, 12 Jul 2023 22:20:06 +0800
+Subject: [PATCH] Video 1 to 2
+
+---
+ .../renderer/bindings/generated_in_core.gni   |  2 ++
+ .../blink/renderer/bindings/idl_in_core.gni   |  1 +
+ .../blink/renderer/core/frame/build.gni       |  2 ++
+ .../blink/renderer/core/frame/dom_window.cc   |  4 +++
+ .../blink/renderer/core/frame/dom_window.h    |  2 ++
+ .../blink/renderer/core/frame/paoding.cc      | 25 ++++++++++++++++
+ .../blink/renderer/core/frame/paoding.h       | 29 +++++++++++++++++++
+ .../blink/renderer/core/frame/paoding.idl     |  7 +++++
+ .../blink/renderer/core/frame/window.idl      |  2 ++
+ 9 files changed, 74 insertions(+)
+ create mode 100644 third_party/blink/renderer/core/frame/paoding.cc
+ create mode 100644 third_party/blink/renderer/core/frame/paoding.h
+ create mode 100644 third_party/blink/renderer/core/frame/paoding.idl
+
+diff --git a/third_party/blink/renderer/bindings/generated_in_core.gni b/third_party/blink/renderer/bindings/generated_in_core.gni
+index 71f7b102144ab..712c03a670999 100644
+--- a/third_party/blink/renderer/bindings/generated_in_core.gni
++++ b/third_party/blink/renderer/bindings/generated_in_core.gni
+@@ -585,6 +585,8 @@ generated_enumeration_sources_in_core = [
+ ]
+ 
+ generated_interface_sources_in_core = [
++  "$root_gen_dir/third_party/blink/renderer/bindings/core/v8/v8_paoding.cc",
++  "$root_gen_dir/third_party/blink/renderer/bindings/core/v8/v8_paoding.h",
+   "$root_gen_dir/third_party/blink/renderer/bindings/core/v8/v8_abort_controller.cc",
+   "$root_gen_dir/third_party/blink/renderer/bindings/core/v8/v8_abort_controller.h",
+   "$root_gen_dir/third_party/blink/renderer/bindings/core/v8/v8_abort_signal.cc",
+diff --git a/third_party/blink/renderer/bindings/idl_in_core.gni b/third_party/blink/renderer/bindings/idl_in_core.gni
+index a3ac4baafd268..5c1fb4736ce01 100644
+--- a/third_party/blink/renderer/bindings/idl_in_core.gni
++++ b/third_party/blink/renderer/bindings/idl_in_core.gni
+@@ -6,6 +6,7 @@
+ # for production.
+ static_idl_files_in_core = get_path_info(
+         [
++          "//third_party/blink/renderer/core/frame/paoding.idl",
+           "//third_party/blink/renderer/core/accessibility/aria_notification_options.idl",
+           "//third_party/blink/renderer/core/animation/animatable.idl",
+           "//third_party/blink/renderer/core/animation/animation.idl",
+diff --git a/third_party/blink/renderer/core/frame/build.gni b/third_party/blink/renderer/core/frame/build.gni
+index 329c363045620..d48a8f0c97419 100644
+--- a/third_party/blink/renderer/core/frame/build.gni
++++ b/third_party/blink/renderer/core/frame/build.gni
+@@ -3,6 +3,8 @@
+ # found in the LICENSE file.
+ 
+ blink_core_sources_frame = [
++  "paoding.cc",
++  "paoding.h",
+   "ad_tracker.cc",
+   "ad_tracker.h",
+   "ad_script_identifier.cc",
+diff --git a/third_party/blink/renderer/core/frame/dom_window.cc b/third_party/blink/renderer/core/frame/dom_window.cc
+index 45e3b6a37ab66..2c91d444a431b 100644
+--- a/third_party/blink/renderer/core/frame/dom_window.cc
++++ b/third_party/blink/renderer/core/frame/dom_window.cc
+@@ -855,6 +855,10 @@ void DOMWindow::RecordWindowProxyAccessMetrics(
+   }
+ }
+ 
++int DOMWindow::sum(int a, int b) {
++  return a + b;
++}
++
+ void DOMWindow::PostedMessage::Trace(Visitor* visitor) const {
+   visitor->Trace(source);
+   visitor->Trace(user_activation);
+diff --git a/third_party/blink/renderer/core/frame/dom_window.h b/third_party/blink/renderer/core/frame/dom_window.h
+index 4ea0aea8bf6a9..62abdb43ec48d 100644
+--- a/third_party/blink/renderer/core/frame/dom_window.h
++++ b/third_party/blink/renderer/core/frame/dom_window.h
+@@ -161,6 +161,8 @@ class CORE_EXPORT DOMWindow : public EventTargetWithInlineData {
+       mojom::blink::WebFeature property_access,
+       mojom::blink::WebFeature property_access_from_other_page) const;
+ 
++  int sum(int a, int b);
++
+  protected:
+   explicit DOMWindow(Frame&);
+ 
+diff --git a/third_party/blink/renderer/core/frame/paoding.cc b/third_party/blink/renderer/core/frame/paoding.cc
+new file mode 100644
+index 0000000000000..76322801e161b
+--- /dev/null
++++ b/third_party/blink/renderer/core/frame/paoding.cc
+@@ -0,0 +1,25 @@
++#include "third_party/blink/renderer/core/frame/paoding.h"
++
++namespace blink {
++
++Paoding::Paoding() {}
++
++Paoding::~Paoding() {}
++
++Paoding* Paoding::Create() {
++  return MakeGarbageCollected<Paoding>();
++}
++
++String Paoding::version(ScriptState* script_state) {
++  return "v1.0.0";
++}
++
++int Paoding::multiply(ScriptState* script_state, int a, int b) {
++  return a * b;
++}
++
++void Paoding::Trace(Visitor* visitor) const {
++  ScriptWrappable::Trace(visitor);
++}
++
++}  // namespace blink
+\ No newline at end of file
+diff --git a/third_party/blink/renderer/core/frame/paoding.h b/third_party/blink/renderer/core/frame/paoding.h
+new file mode 100644
+index 0000000000000..c7d63a73572f2
+--- /dev/null
++++ b/third_party/blink/renderer/core/frame/paoding.h
+@@ -0,0 +1,29 @@
++#ifndef PAODING_H_
++#define PAODING_H_
++
++#include "third_party/blink/renderer/core/core_export.h"
++#include "third_party/blink/renderer/platform/bindings/script_wrappable.h"
++#include "third_party/blink/renderer/platform/heap/visitor.h"
++#include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
++
++namespace blink {
++
++class CORE_EXPORT Paoding final : public ScriptWrappable {
++  DEFINE_WRAPPERTYPEINFO();
++
++ public:
++  explicit Paoding();
++  ~Paoding() override;
++
++  static Paoding* Create();
++
++  String version(ScriptState*);
++
++  int multiply(ScriptState*, int a, int b);
++
++  void Trace(Visitor*) const override;
++};
++
++}  // namespace blink
++
++#endif
+\ No newline at end of file
+diff --git a/third_party/blink/renderer/core/frame/paoding.idl b/third_party/blink/renderer/core/frame/paoding.idl
+new file mode 100644
+index 0000000000000..09cb477002a6b
+--- /dev/null
++++ b/third_party/blink/renderer/core/frame/paoding.idl
+@@ -0,0 +1,7 @@
++[Exposed = Window] interface Paoding {
++  constructor();
++
++  [CallWith = ScriptState] readonly attribute DOMString version;
++
++  [CallWith = ScriptState] long multiply(long a, long b);
++};
+\ No newline at end of file
+diff --git a/third_party/blink/renderer/core/frame/window.idl b/third_party/blink/renderer/core/frame/window.idl
+index cff8b45b51eed..b4a41df0ad893 100644
+--- a/third_party/blink/renderer/core/frame/window.idl
++++ b/third_party/blink/renderer/core/frame/window.idl
+@@ -214,6 +214,8 @@
+     // Collection of fenced frame APIs
+     // https://github.com/shivanigithub/fenced-frame/issues/14
+     [RuntimeEnabled=FencedFrames] readonly attribute Fence? fence;
++
++    long sum(long a, long b);
+ };
+ 
+ Window includes GlobalEventHandlers;
+-- 
+2.39.1.windows.1
+
